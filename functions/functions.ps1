@@ -1469,20 +1469,6 @@ function Set-Rapid7AppSecAppHttpHeadersConfig {
 }
 
 function Get-Rapid7CloudSecInsights {
-    <#
-        .SYNOPSIS
-
-        .DESCRIPTION
-
-        .PARAMETER apiKey
-
-        .PARAMETER domain
-        
-        .OUTPUTS
-
-        .EXAMPLE
-    #>
-
     [CmdletBinding()]
     Param
     (
@@ -1507,20 +1493,6 @@ function Get-Rapid7CloudSecInsights {
 }
 
 function Get-Rapid7CloudSecFilterRegistry {
-    <#
-        .SYNOPSIS
-
-        .DESCRIPTION
-
-        .PARAMETER apiKey
-
-        .PARAMETER domain
-        
-        .OUTPUTS
-
-        .EXAMPLE
-    #>    
-    
     [CmdletBinding()]
     Param
     (
@@ -1548,20 +1520,6 @@ function Get-Rapid7CloudSecFilterRegistry {
 }
 
 function Get-Rapid7CloudSecInsightPacks {
-    <#
-        .SYNOPSIS
-
-        .DESCRIPTION
-
-        .PARAMETER apiKey
-
-        .PARAMETER domain
-        
-        .OUTPUTS
-
-        .EXAMPLE
-    #>
-    
     [CmdletBinding()]
     Param
     (
@@ -1586,37 +1544,17 @@ function Get-Rapid7CloudSecInsightPacks {
 }
 
 function New-Rapid7CloudSecIaCScan {
-    <#
-        .SYNOPSIS
-
-        .DESCRIPTION
-
-        .PARAMETER apiKey
-
-        .PARAMETER domain
-
-        .PARAMETER terraformPlanJson
-
-        .PARAMETER configName
-        
-        .OUTPUTS
-
-        .EXAMPLE
-    #>
-    
     [CmdletBinding()]
     Param
     (
-        [Parameter(Mandatory = $True)] [string] $apiKey,
-        [Parameter(Mandatory = $True)] [string] $domain,
         [Parameter(Mandatory = $True)] [string] $terraformPlanJson,
-        [Parameter(Mandatory = $True)] [string] $configName
+        [Parameter(Mandatory = $True)] [string] $configName,
+        [Parameter(Mandatory = $True)] [string] $domain
     )
 
     $headers = @{
-        'api-key' = "$apiKey"
-        'accpet' = 'application/json'
-        'content-type' = 'application/json'
+        'Accept' = 'application/json'
+        'Content-Type' = 'application/json'
     }
     $uri = "https://$domain/v3/iac/scan?readable=false"
     $uri = [uri]::EscapeUriString($uri)
@@ -1631,30 +1569,12 @@ function New-Rapid7CloudSecIaCScan {
         Method = 'Post'
         Uri = $uri
         Headers = $headers
-        Body = ($body | ConvertTo-Json -Depth 100)
+        Body = $body | ConvertTo-Json -Depth 100
     }
     Invoke-RestMethod @splat
 }
 
 function Get-Rapid7CloudSecFindings {
-    <#
-        .SYNOPSIS
-
-        .DESCRIPTION
-
-        .PARAMETER apiKey
-
-        .PARAMETER domain
-
-        .PARAMETER insightPackName
-
-        .PARAMETER scopes
-        
-        .OUTPUTS
-
-        .EXAMPLE
-    #>
-    
     [CmdletBinding()]
     Param
     (
@@ -1741,24 +1661,6 @@ function Get-Rapid7CloudSecFindings {
 }
 
 function Get-Rapid7CloudSecInsight {
-    <#
-        .SYNOPSIS
-
-        .DESCRIPTION
-
-        .PARAMETER apiKey
-
-        .PARAMETER domain
-
-        .PARAMETER insightId
-
-        .PARAMETER insightSource
-
-        .OUTPUTS
-
-        .EXAMPLE
-    #>
-    
     [CmdletBinding()]
     Param
     (

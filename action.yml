@@ -1,0 +1,60 @@
+name: "Rapid7 dynamic application security testing"
+description: "This action leverages Rapid7 InsightAppSec to scan target URLs for common vulnerabilities."
+inputs:
+  rapid7_api_key:
+    description: "Expects a string value corresponding to the API key to use when interacting with Rapid7 InsightAppSec."
+    required: true
+  app_name:
+    description: "Expects a string value corresponding Rapid7 InsightAppSec App to execute a scan for."
+    required: true
+  scan_config_name:
+    description: "Expects a string value corresponding to the scan config name to use when executing the scan."
+    required: true
+  minimum_severity:
+    description: "Expects a string value corresponding to the minimum severity to include in scan results (e.g., low, medium, high)."
+    required: true
+  timeout_hours:
+    description: "Expects an integer value corresponding to the number of hours to wait before considering the scan to be timed out."
+    required: false
+    default: 2
+  github_repository:
+    description: "Expects a string value corresponding to the GitHub repository to post a GitHub Issue to."
+    required: true
+  rapid7_github_integration_token:
+    description: "Expects a string value corresponding to the GitHub token to use for posting issues."
+    required: true
+  github_issue_assignee:
+    description: "Expects a string value corresponding to the GitHub user to assign issues to if 'create_github_issues' is 'true'."
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout private tools
+      run: git clone https://github.com/awshole/rapid-power.git
+      shell: pwsh
+    - name: Execute scan
+      run: |
+        $splat = @{
+          rapid7ApiKey = '${{ inputs.rapid7_api_key }}'
+          appName = '${{ inputs.app_name }}'
+          scanConfigName = '${{ inputs.scan_config_name }}'
+          timeOutInHours = '${{ inputs.timeout_hours }}'
+          outputDirectory = .
+          gitHubToken = ${{ inputs.rapid7_github_integration_token }}
+        }
+        rapid-power/scripts/New-Rapid7InsightAppSecScan.ps1 @splat
+      shell: pwsh
+    - name: Create GitHub Issue
+      run: |
+        $splat = @{
+          pathToRapid7AppSecIssues = '${{ inputs.app_name }}_${{ inputs.scan_config_name }}_appsec.json'
+          gitHubToken = '${{ inputs.rapid7_github_integration_token }}'
+          gitHubRepository = '${{ inputs.github_repository }}'
+          minimumSeverity = '${{ inputs.minimum_severity }}'
+          labels = @('rapid7', 'insightappsec', 'security')
+        }
+        if ('${{ inputs.github_issue_assignee }}' -notlike '' ) {
+          $splat.Add('githubIssueAssignee', '${{ inputs.github_issue_assignee }}')
+        }
+        rapid-power/scripts/Set-Rapid7InsightAppSecGitHubIssue.ps1 @splat
+      shell: pwsh

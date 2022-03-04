@@ -40,6 +40,12 @@ The below PowerShell functions are defined within the `/functions` directory of 
 - **Set-Rapid7AppSecScanConfigAuthentication** - Sets the authentication settings for a given scan config on a given Rapid7 InsightAppSec App.
 - **Set-Rapid7AppSecScanConfigScanScope** - Sets the URL that will be scanned for a given scan config on a given Rapid7 InsightAppSec App.
 - **Stop-Rapid7AppSecScan** - Will stop a given scan for a given Rapid7 InsightAppSec App.
+- **Get-Rapid7CloudSecInsights** - In progress...
+- **Get-Rapid7CloudSecFilterRegistry** - In progress...
+- **Get-Rapid7CloudSecInsightPacks** - In progress...
+- **New-Rapid7CloudSecIaCScan** - In progress...
+- **Get-Rapid7CloudSecFindings** - In progress...
+- **Get-Rapid7CloudSecInsight** - In progress...
 
 # Scripts
 The below PowerShell scripts are defined within the `/scripts` directory of this repository. Be sure to see detailed Get-Help output that is defined for each script.  
@@ -47,3 +53,52 @@ The below PowerShell scripts are defined within the `/scripts` directory of this
 - **New-Rapid7InsightAppSecScan.ps1** - This script executes a new scan for a given Rapid7 InsightAppSec App, and provides a JSON output to a specified directory. 
 - **New-Rapid7InsightVMContainerImageScan.ps1** - This script initiates a new scan for a given container image, and provides a JSON output to a specified directory. 
 - **Set-Rapid7InsightAppSecGitHubIssues.ps1** - This script creates a GitHub Issue for identified vulnerabilities. 
+
+# Example InsightAppSec GitHub Action
+
+A [GitHub Action](https://github.com/features/actions) for using [Rapid7](https://docs.rapid7.com/insightappsec/) for Dynamic Application Security Testing.
+
+```yaml
+name: rapid7-appsec-analysis
+on:
+  workflow_dispatch:
+jobs:
+  rapid7-appsec-analysis:
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: # Rapid7 InsightAppSec App name goes here (e.g., tsg-web-webscantest-dev)
+      SCAN_CONFIG_NAME: # Rapid7 InsightAppSec App scan config name goes here (e.g., 'Login page')
+      MINIMUM_SEVERITY: # The minimum severity to report on goes here (e.g., low, medium, high)
+    steps:
+      - name: Checkout working repository
+        uses: actions/checkout@v2
+      - name: Checkout additional GitHub Actions repository
+        uses: actions/checkout@v2
+        with:
+          repository: awshole/rapid-power
+          token: ${{ github.token }}
+          path: private-actions/rapid-power
+      - name: Conduct Rapid7 InsightAppSec analysis
+        uses: ./private-actions/rapid-power
+        with:
+          rapid7_api_key: ${{ secrets.RAPID7_TOKEN }}
+          app_name: ${{ env.APP_NAME }}
+          scan_config_name: ${{ env.SCAN_CONFIG_NAME }}
+          minimum_severity: ${{ env.MINIMUM_SEVERITY }}
+          github_repository: ${{ github.repository }}
+          rapid7_github_integration_token: ${{ github.token }}
+```
+
+The Rapid7 InsightAppSec Action has properties which are passed to the underlying shell executing custom scripts. These are
+passed to the action using `with`.
+
+| Property                        | Required | Default | Description                                                                                                          |
+|---------------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------|
+| rapid7_api_key                  | TRUE     |         | Expects a string value corresponding to the API key to use when interacting with Rapid7 InsightAppSec.             |
+| app_name                        | TRUE     |         | Expects a string value corresponding Rapid7 InsightAppSec App to execute a scan for.                               |
+| scan_config_name                | TRUE     |         | Expects a string value corresponding to the scan config name to use when executing the scan.                       |
+| minimum_severity                | TRUE     |         | Expects a string value corresponding to the minimum severity to include in scan results (e.g., low, medium, high). |
+| github_repository               | TRUE     |         | Expects a string value corresponding to the GitHub repository to post a GitHub Issue to.                           |
+| rapid7_github_integration_token | TRUE     |         | Expects a string value corresponding to the GitHub token to use for posting issues.                                |
+| create_github_issues            | FALSE    | FALSE   | If this is true, details of the container image scan will be posted to the Issues tab of a repository.             |
+| github_issue_assignee           | FALSE    |         | Expects a string value corresponding to the GitHub user to assign issues to if 'create_github_issues' is 'true'. |
