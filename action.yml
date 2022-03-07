@@ -40,7 +40,7 @@ runs:
           scanConfigName = '${{ inputs.scan_config_name }}'
           timeOutInHours = '${{ inputs.timeout_hours }}'
           outputDirectory = '.'
-          gitHubToken = ${{ inputs.rapid7_github_integration_token }}
+          gitHubToken = '${{ inputs.rapid7_github_integration_token }}'
         }
         rapid-power/scripts/New-Rapid7InsightAppSecScan.ps1 @splat
       shell: pwsh
